@@ -38,9 +38,10 @@ def getRows(bossurl):
         runes = int(runestr)
     except:
         runes = 0
+        print(f"Skipping {name} because failed to find runes")
     if runes > 0:
-        print(f"Skipping {name} because runes are 0")
         result.append([url, name, runes])
+        print(f"{name} added. runes: {runes}")
     return result
 
 
