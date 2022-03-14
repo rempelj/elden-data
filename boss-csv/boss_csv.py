@@ -1,3 +1,5 @@
+import re
+
 from bs4 import BeautifulSoup
 import requests
 import os
@@ -7,7 +9,7 @@ import time
 
 headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'}
 baseurl = "https://eldenring.wiki.fextralife.com"
-max_results = 2
+max_results = 0
 
 
 def writerows(rows, filename):
@@ -30,8 +32,15 @@ def getRows(bossurl):
     soup = BeautifulSoup(str(soup.find("div", class_="infobox")), "html.parser")
     datarows = soup.find_all("tr")
     name = datarows[0].text.strip()
-    runes = 0
-    result.append([url, name, runes])
+    try:
+        runeresult = re.findall("([0-9,]+)", soup.text)
+        runestr = runeresult[0].replace(',', '')
+        runes = int(runestr)
+    except:
+        runes = 0
+    if runes > 0:
+        print(f"Skipping {name} because runes are 0")
+        result.append([url, name, runes])
     return result
 
 
