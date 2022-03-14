@@ -11,11 +11,16 @@ headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko
 baseurl = "https://eldenring.wiki.fextralife.com"
 max_results = 0
 
-
 def writerows(rows, filename):
+    rows = sorted(rows, key=lambda tup: tup[2])
+    seen = set()
     with open(filename, 'a', encoding='utf-8') as toWrite:
         writer = csv.writer(toWrite)
-        writer.writerows(rows)
+        for row in rows:
+            if row[0] in seen:
+                continue
+            seen.add(row[0])
+            writer.writerow(row)
 
 
 def getRows(bossurl):
@@ -31,17 +36,22 @@ def getRows(bossurl):
     soup = BeautifulSoup(response.text, "html.parser")
     soup = BeautifulSoup(str(soup.find("div", class_="infobox")), "html.parser")
     datarows = soup.find_all("tr")
-    name = datarows[0].text.strip()
+    name = bossurl
     try:
-        runeresult = re.findall("([0-9,]+)", soup.text)
+        name = datarows[0].text.strip()
+    except Exception as e:
+        print(f"Failed to get name for {name}")
+        print(e)
+    try:
+        name = datarows[0].text.strip()
+        runeresult = re.findall("([0-9]+,?[0-9]+)", soup.text)
         runestr = runeresult[0].replace(',', '')
         runes = int(runestr)
-    except:
+    except Exception as e:
         runes = 0
-        print(f"Skipping {name} because failed to find runes")
-    if runes > 0:
-        result.append([url, name, runes])
-        print(f"{name} added. runes: {runes}")
+        print(f"Failed to get runes for {name}")
+        print(e)
+    result.append([url, name, runes])
     return result
 
 
@@ -71,7 +81,7 @@ if __name__ == "__main__":
     rows = []
     i = 0
     for url in urls:
-        time.sleep(3)
+        time.sleep(1)
         rows += getRows(url)
         i += 1
         if max_results > 0 and i > max_results:
