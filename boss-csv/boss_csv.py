@@ -56,7 +56,7 @@ def getRows(bossurl):
 
     # get runes for each location
     print(souptext)
-    matches = re.findall("([a-zA-Z \-'()]+).{0,}?\s{0,}?[^0-9,]([0-9]+,?[0-9 ]+).{0,}?\s{0,}?Runes", souptext)
+    matches = re.findall("([a-zA-Z \-'()]+).{0,}?\s{0,}?:{0,1}[^0-9,]([0-9]+,?[0-9 ]+).{0,}?\s{0,}?Runes", souptext)
     for match in matches:
         try:
             locationstr = match[0].replace("Drops", "").replace("(", "").replace(")", "").strip()
