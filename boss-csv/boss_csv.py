@@ -1,4 +1,5 @@
 import re
+import sys
 
 from bs4 import BeautifulSoup
 import requests
@@ -9,7 +10,6 @@ import time
 
 headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'}
 baseurl = "https://eldenring.wiki.fextralife.com"
-max_results = 0
 
 def writerows(rows, filename):
     rows = sorted(rows, key=lambda tup: tup[2])
@@ -95,6 +95,10 @@ def geturls():
 
 
 if __name__ == "__main__":
+    max_results = 0
+    if len(sys.argv) > 1:
+        max_results = int(sys.argv[1]) # first arg is max results
+
     filename = "bosses.csv"
     if os.path.exists(filename):
         os.remove(filename)
