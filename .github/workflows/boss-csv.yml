@@ -14,3 +14,7 @@ jobs:
         cache: 'pip'
     - run: pip install -r boss-csv/requirements.txt
     - run: python boss-csv/boss_csv.py
+    - uses: actions/upload-artifact@v3
+      with:
+        name: bosses.csv
+        path: bosses.csv
