@@ -1,7 +1,12 @@
 name: boss-csv
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      maxResults:
+        description: 'Max results'     
+        required: false
+        default: '0'
 
 jobs:
   boss-csv:
@@ -13,7 +18,7 @@ jobs:
         python-version: '3.9'
         cache: 'pip'
     - run: pip install -r boss-csv/requirements.txt
-    - run: python boss-csv/boss_csv.py
+    - run: python boss-csv/boss_csv.py ${{ github.event.inputs.maxResults }}
     - uses: actions/upload-artifact@v3
       with:
         name: bosses.csv
