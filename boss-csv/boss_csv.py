@@ -1,9 +1,7 @@
 import re
 import sys
-
 from bs4 import BeautifulSoup
 import requests
-import os
 import os.path
 import csv
 import time
@@ -17,9 +15,10 @@ def writerows(rows, filename):
     with open(filename, 'a', encoding='utf-8') as toWrite:
         writer = csv.writer(toWrite)
         for row in rows:
-            if row in seen:
+            dupecompare = [row[1], row[2]]  # Remove duplicate if name and runes match
+            if dupecompare in seen:
                 continue
-            seen.append(row)
+            seen.append(dupecompare)
             writer.writerow(row)
 
 
