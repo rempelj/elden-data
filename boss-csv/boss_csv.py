@@ -36,6 +36,8 @@ def getRows(bossurl):
     soup = BeautifulSoup(response.text, "html.parser")
     soup = BeautifulSoup(str(soup.find("div", class_="infobox")), "html.parser")
     datarows = soup.find_all("tr")
+    souptext = soup.get_text(separator="\n")
+    souptext = re.sub(r'\n\s*\n', '\n', souptext)
 
     # get boss name
     name = bossurl
@@ -45,38 +47,32 @@ def getRows(bossurl):
         print(f"Failed to get name for {name}")
         print(e)
 
-    # get locations
-    locations = []
+    fallbacklocation = ""
     try:
-        locationstext = datarows[2].get_text(separator="\n")
-        locations = locationstext.replace("\n", ",").split(",")
-        locations = list(filter(None, locations))
-        locations.remove("Location")
+        fallbacklocation = re.findall("Location\s{0,}([a-zA-Z \-'()]+)", souptext)[0]
     except Exception as e:
-        print(f"Failed to get locations for {name}")
+        print(f"Failed to get fallback location for {name}")
         print(e)
 
-    # add the first rune value found
-    try:
-        runeresult = re.findall("([0-9]+,?[0-9]+)", soup.text)
-        runestr = runeresult[0].replace(',', '')
-        runes = int(runestr)
-        result.append([url, name, runes, locations[0]])
-    except Exception as e:
-        print(f"Failed to find runes for {name}")
-        print(e)
-
-    # try to add all locations
-    for location in locations:
+    # get runes for each location
+    print(souptext)
+    matches = re.findall("([a-zA-Z \-'()]+).{0,}?\s{0,}?[^0-9,]([0-9]+,?[0-9 ]+).{0,}?\s{0,}?Runes", souptext)
+    for match in matches:
         try:
-            runeresult = re.findall(f"{location.strip()}*.\s*([0-9]+,?[0-9]+)", datarows[3].get_text() + datarows[4].get_text())
-            runestr = runeresult[0].replace(',', '')
-            runes = int(runestr)
-            result.append([url, name, runes, location])
+            locationstr = match[0].replace("Drops", "").replace("(", "").replace(")", "").strip()
+            runesstr = match[1].replace(' ', '').replace(',', '').strip()
+            runes = int(runesstr)
+            row = [url, name, runes, fallbacklocation if locationstr == "" else locationstr]
+            result.append(row)
+            print("Added " + str(row))
         except Exception as e:
-            print(f"Skipping runes for {name} in Location '{location}'")
+            print(f"Failed to find location runes for {name} with {match}")
             print(e)
 
+    if len(matches) == 0:
+        print(f"No runes found for {name}")
+
+    print("\n")
     return result
 
 
